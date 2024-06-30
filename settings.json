@@ -1,0 +1,44 @@
+{
+    "workbench.colorTheme": "Dainty – Andromeda",
+    "redhat.telemetry.enabled": false,
+    "editor.formatOnSave": true,
+    "editor.fontFamily": "Hack",
+    "editor.fontSize": 14,
+    "editor.wordWrap": "on",
+    "terminal.integrated.fontFamily": "Fira Code",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "workbench.iconTheme": "ayu",
+    "editor.tokenColorCustomizations": {
+        "[Dainty – Andromeda]": {
+            "textMateRules": [
+                {
+                    "scope": [
+                        "comment",
+                        "keyword.control",
+                        "keyword.operator.new",
+                        "keyword.operator.assignment",
+                        "keyword.operator.arithmetic",
+                        "storage.modifier",
+                        "storage.type",
+                        "support.class",
+                        "support.constant",
+                        "support.other",
+                        "entity.name.method",
+                        "entity.name.section",
+                        "entity.name.selector",
+                        "entity.name.type",
+                        "entity.other",
+                        "entity.other.attribute-name",
+                        "entity.other.inherited-class"
+                      ],
+                    "settings": {
+                        "fontStyle": "italic"
+                    }
+                }
+            ]
+        }
+    },
+    "javascript.updateImportsOnFileMove.enabled": "always"
+}

@@ -1,0 +1,257 @@
+---
+- hosts: all
+  connection: local
+  collections:
+    - community.general.snap
+    - community.general.dconf
+  become: true
+
+  vars:
+    main_user: pezz
+    preferred_cursor: Yaru
+
+  tasks:
+    - name: Upgrade OS
+      apt:
+        upgrade: dist
+
+    - name: Check for presence of nosnap.pref
+      stat:
+        path: /etc/apt/preferences.d/nosnap.pref
+      register: nosnap_pref
+
+    - name: Backup nosnap.pref
+      command: mv -f /etc/apt/preferences.d/nosnap.pref /home/{{ main_user }}/Documents/nosnap.bak
+      args:
+        creates: ~/Documents/nosnap.bak
+      when: nosnap_pref.stat.exists
+
+    - name: Remove nosnap.pref
+      file:
+        path: /etc/apt/preferences.d/nosnap.pref
+        state: absent
+      when: nosnap_pref.stat.exists
+
+    - name: Update pkg cache
+      apt:
+        update_cache: yes
+
+    - name: Install Snapd
+      apt:
+        name: snapd
+        state: present
+
+    - name: Install base packages
+      apt:
+        pkg:
+          - git
+          - htop
+          - nodejs
+          - npm
+          - docker
+          - docker-compose
+          - zsh
+          - curl
+          - python3
+          - python3-venv
+          - golang
+          - clang
+          - cmake
+          - wireshark
+          - mitmproxy
+          - nmap
+          - net-tools
+          - tldr
+          - tree
+          - qemu-system
+          - virt-manager
+          - figlet
+
+    - name: Install Snaps - Classic
+      snap:
+        name:
+          - code
+          - signal-desktop
+          - alacritty
+          - aws-cli
+        classic: yes
+
+    - name: Install 1Password deb pkg
+      apt:
+        deb: https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
+
+    - name: Set default shell to ZSH
+      shell: chsh -s $(which zsh) {{main_user}}
+      become: true
+
+    - name: Install oh-my-zsh
+      shell: ls ~/.oh-my-zsh/ || sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
+      become_user: "{{ main_user }}"
+
+    - name: Import zshrc
+      copy:
+        src: zshrc
+        dest: ~/.zshrc
+        force: yes
+      become_user: "{{ main_user }}"
+
+    - name: Install zsh-syntax-highlighting plugin
+      become_user: "{{ main_user }}"
+      vars:
+        zsh_homedir: "/home/{{ main_user }}/.oh-my-zsh/custom"
+      git:
+        repo: "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+        dest: "{{ zsh_homedir }}/plugins/zsh-syntax-highlighting"
+        clone: yes
+        force: yes
+
+    - name: Install zsh-autosuggestions plugin
+      become_user: "{{ main_user }}"
+      vars:
+        zsh_homedir: "/home/{{ main_user }}/.oh-my-zsh/custom"
+      git:
+        repo: "https://github.com/zsh-users/zsh-autosuggestions.git"
+        dest: "{{ zsh_homedir }}/plugins/zsh-autosuggestions"
+        clone: yes
+        force: yes
+
+    - name: Check for existence of ~/.config/Code/User
+      become_user: "{{ main_user }}"
+      file:
+        path: ~/.config/Code/User
+        state: directory
+        owner: "{{ main_user }}"
+        group: "{{ main_user }}"
+        mode: "0755"
+
+    - name: Import VSCode Settings.json
+      copy:
+        src: settings.json
+        dest: ~/.config/Code/User/settings.json
+        force: yes
+      become_user: "{{ main_user }}"
+
+    - name: Install VSCode Extensions
+      become_user: "{{ main_user }}"
+      shell: bash install_vscode_exts.sh
+
+    # Themes
+
+    - name: Set color scheme to to prefer-dark
+      dconf:
+        key: "/org/x/apps/portal/color-scheme"
+        value: "'prefer-dark'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set theme to Mint-L-Dark Teal - CINNAMON
+      dconf:
+        key: "/org/cinnamon/desktop/interface/gtk-theme"
+        value: "'Mint-L-Dark-Teal'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set theme to Mint-L-Dark Teal - GNOME
+      dconf:
+        key: "/org/gnome/desktop/interface/gtk-theme"
+        value: "'Mint-L-Dark-Teal'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set Cinnamon theme name
+      dconf:
+        key: "/org/cinnamon/theme/name"
+        value: "'Mint-L-Dark-Teal'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set icon theme - CINNAMON
+      dconf:
+        key: "/org/cinnamon/desktop/interface/icon-theme"
+        value: "'Mint-L-Teal'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set icon theme - GNOME
+      dconf:
+        key: "/org/gnome/desktop/interface/icon-theme"
+        value: "'Mint-L-Teal'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Resize panel height
+      dconf:
+        key: "/org/cinnamon/panels-height"
+        value: "['1:20']"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set Accessibility text-scaling-factor
+      dconf:
+        key: "/org/gnome/desktop/interface/text-scaling-factor"
+        value: "1.0"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set Panel symbolic icon sizes
+      dconf:
+        key: "/org/cinnamon/panel-zone-symbolic-icon-sizes"
+        value: "[{'panelId': 1, 'left': 16, 'center': 16, 'right': 15}]"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Alt-tab switcher style
+      dconf:
+        key: "/org/cinnamon/alttab-switcher-style"
+        value: "'icons'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set cursor to preferred cursor
+      dconf:
+        key: "/org/cinnamon/desktop/interface/cursor-theme"
+        value: "'Yaru'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Disable god-forsaken middle click paste
+      become_user: "{{ main_user }}"
+      shell: gsettings set org.cinnamon.desktop.interface gtk-enable-primary-paste false
+
+    - name: Set lock screen timeout
+      dconf:
+        key: "/org/cinnamon/desktop/session/idle-delay"
+        value: 1800 # uint32
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Set screensaver time format
+      dconf:
+        key: "/org/cinnamon/desktop/screensaver/time-format"
+        value: "'%H:%M:%S'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Copy Wallpapers to /usr/share/backgrounds
+      copy:
+        src: wallpapers/
+        dest: /usr/share/backgrounds/
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Set Desktop Wallpaper to current favorite
+      dconf:
+        key: "/org/cinnamon/desktop/background/picture-uri"
+        value: "'file:///usr/share/backgrounds/purple-skeleton-wallpaper.png'"
+        state: present
+      become_user: "{{ main_user }}"
+
+    - name: Check if /etc/xdg/autostart/mintupdate.desktop exists
+      stat:
+        path: /etc/xdg/autostart/mintupdate.desktop
+      register: mintupdate_desktop
+
+    - name: Deactivate Mint Update Manager
+      shell: mv /etc/xdg/autostart/mintupdate.desktop /etc/xdg/autostart/mintupdate.desktop.disabled
+      when: mintupdate_desktop.stat.exists
