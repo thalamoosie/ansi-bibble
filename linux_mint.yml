@@ -66,6 +66,9 @@
           - qemu-system
           - virt-manager
           - figlet
+          - flameshot
+          - libpam-fprintd
+          - xclip
 
     - name: Install Snaps - Classic
       snap:
@@ -74,6 +77,7 @@
           - signal-desktop
           - alacritty
           - aws-cli
+          - discord
         classic: yes
 
     - name: Install 1Password deb pkg
@@ -182,7 +186,7 @@
     - name: Resize panel height
       dconf:
         key: "/org/cinnamon/panels-height"
-        value: "['1:20']"
+        value: "['1:24']"
         state: present
       become_user: "{{ main_user }}"
 
