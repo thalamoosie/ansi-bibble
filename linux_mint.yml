@@ -84,6 +84,13 @@
       apt:
         deb: https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
 
+    - name: Install NVM (Node Version Manager)
+      shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+      args:
+        executable: /bin/bash
+        chdir: "$HOME"
+        creates: "$HOME/.nvm/nvm.sh"
+
     - name: Set default shell to ZSH
       shell: chsh -s $(which zsh) {{main_user}}
       become: true
