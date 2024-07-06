@@ -78,6 +78,8 @@
           - alacritty
           - aws-cli
           - discord
+          - slack
+          - ghidra # Nowthe NSA lives in my laptop!
         classic: yes
 
     - name: Install 1Password deb pkg
@@ -90,6 +92,11 @@
         executable: /bin/bash
         chdir: "$HOME"
         creates: "$HOME/.nvm/nvm.sh"
+
+    - name: Install Typescript (Global)
+      npm:
+        name: typescript
+        global: true
 
     - name: Set default shell to ZSH
       shell: chsh -s $(which zsh) {{main_user}}
